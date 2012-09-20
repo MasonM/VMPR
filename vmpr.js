@@ -65,35 +65,40 @@ casper.verboseEcho = function(msg) {
 };
 
 casper.pinChangeLoop = function pinChangeUrl() {
-    this.waitForSelector('#cboxIframe #vkeyForm');
-    this.verboseEcho("Got to account page");
+    this.verboseEcho('Got to account page. url = ' + this.getCurrentUrl() + ', title = ' + this.getTitle());
+    this.waitForSelector('#cboxIframe', null, function() {
+        this.echo("Timeout waiting for PIN change iframe to appear.");
+    });
     //anti-bot-detection
     this.wait(randomBetween(500, 1500));
-
-    pin = generatePin();
-    // this is needed because the form to change the PIN is in an iframe,
-    // which casper.fill() can't get to
-    this.evaluate(function(newPin) {
-        var form = jQuery('#cboxIframe').contents().find('#vkeyForm');
-        form.find('#newVkey').val(newPin);
-        form.find('#confirmVkey').val(newPin);
-        form.submit();
-    }, { newPin: pin });
-    this.echo(pin);
-
-    var sleepTime = randomBetween(frequency - fuzz, frequency + fuzz);
-    this.verboseEcho("Sleeping for " + sleepTime + " seconds");
-    this.wait(sleepTime * 1000);
-    this.thenOpen(pinChangeUrl).then(this.pinChangeLoop);
+    this.then(function() {
+        pin = generatePin();
+        this.echo(pin);
+        this.verboseEcho("Submitting form");
+        // this is needed because the form to change the PIN is in an iframe,
+        // which casper.fill() can't get to
+        this.evaluate(function(newPin) {
+            var form = jQuery('#cboxIframe').contents().find('#vkeyForm');
+            form.find('#newVkey').val(newPin);
+            form.find('#confirmVkey').val(newPin);
+            form.submit();
+        }, { newPin: pin });
+    });
+    this.then(function() {
+        this.verboseEcho('Submitted form. url = ' + this.getCurrentUrl() + ', title = ' + this.getTitle());
+        var sleepTime = randomBetween(frequency - fuzz, frequency + fuzz);
+        this.verboseEcho("Sleeping for " + sleepTime + " seconds");
+        this.wait(sleepTime * 1000);
+    });
+    this.thenOpen(pinChangeUrl, this.pinChangeLoop);
 }
 
 casper
-    .userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1')
     .start(pinChangeUrl)
+    .userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1')
+    .wait(randomBetween(500, 1500))
     .then(function login() {
-        this.waitForSelector('.login_form')
         //anti-bot-detection
-        this.wait(randomBetween(500, 1500));
         this.verboseEcho("Submitting login form");
         this.fill('.login_form', {
             "min": phoneNum,
