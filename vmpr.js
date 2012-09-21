@@ -60,12 +60,14 @@ function usage() {
     var usageText = "\
 Usage: phantomjs vmpr.js PHONE PIN [OPTION]\n\n\
 Options:\n\
+   --output\tWhere to write new PINs. Defaults to stdout.\n\
    --frequency\tFrequency in seconds to change PIN. Defaults to 360 (5 minutes).\n\
    --verbose\tPrint debugging information.\n\
    --fuzz\tTime fuzz factor in seconds for varying the frequency to avoid bot detection.\n\
          \tDefaults to 10 seconds.\n\
-Example: casperjs vmpr.js 2222222222 11111 --frequency=1020 --fuzz=20";
-    casper.echo(usageText).exit(1);
+Example:\n\
+   phantomjs vmpr.js --frequency=1020 --fuzz=20 --output=new_pins.txt 2222222222 11111";
+    casper.echo(usageText).exit(0);
 }
 
 var fs = require('fs');
@@ -83,12 +85,20 @@ if (casper.cli.has("help") || !casper.cli.has(0) || !casper.cli.has(1)) {
 }
 
 var pinChangeUrl = "https://www1.virginmobileusa.com/myaccount/home.do?o=/myaccount/prepareAccountSettings.do",
+    outFilename = casper.cli.get('output'),
+    outFile,
     verbose = casper.cli.has('verbose'),
     phoneNum = casper.cli.get(0),
     frequency = casper.cli.get('frequency'),
     fuzz = casper.cli.get('fuzz'),
     pin = casper.cli.get(1);
 
+if (outFilename) {
+    outFile = fs.open(outFilename, 'a+');
+    if (!outFile) {
+        casper.die("Couldn't open output file", 1);
+    }
+}
 if (verbose) casper.options['logLevel'] = "debug";
 if (!fuzz) fuzz = 10
 if (!frequency) frequency = 60 * 5;
@@ -107,8 +117,14 @@ casper.changePinLoop = function changePin() {
     this.wait(randomBetween(500, 1500));
     this.then(function() {
         pin = generatePin();
-        this.echo(pin);
-        this.verboseEcho("Submitting form");
+        if (outFile) {
+            if (!outFile.writeLine(pin)) {
+                this.die("Failed to write new PIN to file: " + pin, 1);
+            }
+        } else {
+            this.echo(pin);
+        }
+        this.verboseEcho("Generated pin " + pin + ", now submitting PIN change form");
         // this is needed because the form to change the PIN is in an iframe,
         // which casper.fill() can't get to
         this.evaluate(function(newPin) {
