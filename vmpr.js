@@ -94,7 +94,7 @@ var pinChangeUrl = "https://www1.virginmobileusa.com/myaccount/home.do?o=/myacco
     pin = casper.cli.get(1);
 
 if (outFilename) {
-    outFile = fs.open(outFilename, 'a+');
+    outFile = fs.open(outFilename, 'a');
     if (!outFile) {
         casper.die("Couldn't open output file", 1);
     }
@@ -121,6 +121,7 @@ casper.changePinLoop = function changePin() {
             if (!outFile.writeLine(pin)) {
                 this.die("Failed to write new PIN to file: " + pin, 1);
             }
+            outFile.flush();
         } else {
             this.echo(pin);
         }
