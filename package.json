@@ -1,0 +1,35 @@
+{
+  "name": "vmpr",
+  "description": "VMPR (Virgin-Mobile PIN Randomizer) is a program to change a Virgin Mobile account PIN to a random number at set time intervals."
+  "version": "0.1",
+  "keywords": [
+    "phantomjs",
+    "javascript"
+  ],
+  "maintainers": [
+    {
+      "name": "Mason Malone",
+      "email": "mason@masonm.com",
+      "web": "http://www.masonm.org"
+    }
+  ],
+  "dependencies": {
+    "http://www.casperjs.org/": "1.0.0-RC1"
+  },
+  "bugs": {
+    "url": "http://bitbucket.org/MasonM/vmpr/issues"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://bitbucket.org/MasonM/vmpr.git"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "MIT",
+      "url": "http://www.opensource.org/licenses/mit-license.php"
+    }
+  ],
+  "homepage": "http://bitbucket.org/MasonM/vmpr"
+}
