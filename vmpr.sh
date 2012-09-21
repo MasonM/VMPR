@@ -1,2 +1,2 @@
 #!/bin/bash
-phantomjs vmpr.js
+phantomjs vmpr.js "$@"
