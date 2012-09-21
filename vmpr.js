@@ -1,3 +1,31 @@
+/*!
+ * VMPR (Virgin-Mobile PIN Randomizer) is a simple script to change a Virgin
+ * Mobile account PIN to a random number at set time intervals.
+ *
+ * Repository:    http://bitbucket.org/MasonM/vmpr
+ *
+ * Copyright (c) 2012 Mason Malone
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 function generatePin() {
     var buffer = new Uint32Array([1]);
     crypto.getRandomValues(buffer);
@@ -42,7 +70,7 @@ Example: casperjs vmpr.js 2222222222 11111 --frequency=1020 --fuzz=20";
 
 var casper = require("casper").create({
     verbose: true,
-    logLevel: "debug"
+    logLevel: "error"
 });
 
 if (casper.cli.has("help") || !casper.cli.has(0) || !casper.cli.has(1)) {
@@ -56,6 +84,7 @@ var pinChangeUrl = "https://www1.virginmobileusa.com/myaccount/home.do?o=/myacco
     fuzz = casper.cli.get('fuzz'),
     pin = casper.cli.get(1);
 
+if (verbose) casper.options['logLevel'] = "debug";
 if (!fuzz) fuzz = 10
 if (!frequency) frequency = 60 * 5;
 
@@ -64,10 +93,10 @@ casper.verboseEcho = function(msg) {
     this.echo(msg);
 };
 
-casper.pinChangeLoop = function pinChangeUrl() {
+casper.changePinLoop = function changePin() {
     this.verboseEcho('Got to account page. url = ' + this.getCurrentUrl() + ', title = ' + this.getTitle());
     this.waitForSelector('#cboxIframe', null, function() {
-        this.echo("Timeout waiting for PIN change iframe to appear.");
+        this.die("Timeout waiting for PIN change iframe to appear.", 1);
     });
     //anti-bot-detection
     this.wait(randomBetween(500, 1500));
@@ -90,7 +119,8 @@ casper.pinChangeLoop = function pinChangeUrl() {
         this.verboseEcho("Sleeping for " + sleepTime + " seconds");
         this.wait(sleepTime * 1000);
     });
-    this.thenOpen(pinChangeUrl, this.pinChangeLoop);
+    this.thenOpen(pinChangeUrl);
+    this.then(this.changePinLoop);
 }
 
 casper
@@ -113,5 +143,5 @@ casper
             this.die("Got sent to an unexpected page: " + this.getCurrentUrl(), 1);
         }
     })
-    .then(casper.pinChangeLoop)
+    .then(casper.changePinLoop)
     .run();
