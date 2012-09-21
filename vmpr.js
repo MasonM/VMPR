@@ -58,7 +58,7 @@ function randomBetween(min, max) {
 
 function usage() {
     var usageText = "\
-Usage: casperjs vmpr.js PHONE PIN [OPTION]\n\n\
+Usage: phantomjs vmpr.js PHONE PIN [OPTION]\n\n\
 Options:\n\
    --frequency\tFrequency in seconds to change PIN. Defaults to 360 (5 minutes).\n\
    --verbose\tPrint debugging information.\n\
@@ -67,6 +67,11 @@ Options:\n\
 Example: casperjs vmpr.js 2222222222 11111 --frequency=1020 --fuzz=20";
     casper.echo(usageText).exit(1);
 }
+
+var fs = require('fs');
+
+phantom.casperPath = 'casperjs';
+phantom.injectJs(phantom.casperPath + fs.separator + 'bin' + fs.separator + 'bootstrap.js');
 
 var casper = require("casper").create({
     verbose: true,
