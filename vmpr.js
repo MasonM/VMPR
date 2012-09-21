@@ -61,7 +61,7 @@ function usage() {
 Usage: phantomjs vmpr.js PHONE PIN [OPTION]\n\n\
 Options:\n\
    --output\tWhere to write new PINs. Defaults to stdout.\n\
-   --frequency\tFrequency in seconds to change PIN. Defaults to 360 (5 minutes).\n\
+   --frequency\tFrequency in seconds to change PIN. Defaults to 180 (3 minutes).\n\
    --verbose\tPrint debugging information.\n\
    --fuzz\tTime fuzz factor in seconds for varying the frequency to avoid bot detection.\n\
          \tDefaults to 10 seconds.\n\
@@ -101,7 +101,7 @@ if (outFilename) {
 }
 if (verbose) casper.options['logLevel'] = "debug";
 if (!fuzz) fuzz = 10
-if (!frequency) frequency = 60 * 5;
+if (!frequency) frequency = 60 * 3;
 
 casper.verboseEcho = function(msg) {
     if (!verbose) return;
@@ -113,8 +113,7 @@ casper.changePinLoop = function changePin() {
     this.waitForSelector('#cboxIframe', null, function() {
         this.die("Timeout waiting for PIN change iframe to appear.", 1);
     });
-    //anti-bot-detection
-    this.wait(randomBetween(500, 1500));
+    this.wait(randomBetween(500, 1500)); //anti-bot-detection
     this.then(function() {
         pin = generatePin();
         if (outFile) {
@@ -148,9 +147,8 @@ casper.changePinLoop = function changePin() {
 casper
     .start(pinChangeUrl)
     .userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1')
-    .wait(randomBetween(500, 1500))
+    .wait(randomBetween(500, 1500)) //anti-bot-detection
     .then(function login() {
-        //anti-bot-detection
         this.verboseEcho("Submitting login form");
         this.fill('.login_form', {
             "min": phoneNum,
