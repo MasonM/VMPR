@@ -3,20 +3,22 @@
 <title>Virgin Mobile PIN Changer</title>
 <meta http-equiv="x-ua-compatible" content="ie=9">
 <HTA:APPLICATION 
-     APPLICATIONNAME="Virgin Mobile PIN Changer"
-     SCROLL="no"
-     SINGLEINSTANCE="yes"
+	APPLICATIONNAME="Virgin Mobile PIN Changer"
+	SCROLL="no"
+	SINGLEINSTANCE="yes"
 >
 <style type="text/css">
 div label { display: block }
 div { display: inline-block; padding: 5px }
 </style>
 <script language="VBScript">
-	Sub Window_onLoad
+	sub Window_onLoad
 		window.resizeTo 400,240
-	End Sub
+	end sub
 	
-    Sub RunProgram
+	sub RunProgram
+		dim phone, pin, freq, fuzz, output, verbose, command, objShell
+		
 		phone = document.getElementById("phone").value
 		pin = document.getElementById("pin").value
 		if (Len(phone) = 0) then
@@ -37,41 +39,43 @@ div { display: inline-block; padding: 5px }
 		if (Len(fuzz)) then command = command & " --fuzz=" & fuzz
 		if (Len(output)) then command = command & " --output=" & output
 		if (verbose) then command = command & " --verbose"
-				
-        Set objShell = CreateObject("Wscript.Shell")
 		'Msgbox command
-        objShell.Run command
-    End Sub
+				
+		set objShell = CreateObject("Wscript.Shell")
+		objShell.run command, 1, false
+		window.close()
+	end sub
 </script>
 </head>
 <body>
 <form>
 <div>
-    <label for="phone">Phone number</label>
-    <input type="text" id="phone" size="10"/>
+	<label for="phone">Phone number</label>
+	<input type="text" id="phone" size="10"/>
 </div>
 <div>
-    <label for="pin">PIN</label>
-    <input type="text" id="pin" size="6"/>
+	<label for="pin">PIN</label>
+	<input type="text" id="pin" size="6"/>
 </div>    
 
 <div>    
-    <label for="freq">Frequency</label>
-    <input type="text" id="freq" value="180" size="6"/>
+	<label for="freq">Frequency in seconds</label>
+	<input type="text" id="freq" value="180" size="6"/>
 </div>
 <div>
-    <label>Fuzz factor</label>
-    <input type="text" id="fuzz" value="10" size="3"/>
+	<label>Fuzz factor</label>
+	<input type="text" id="fuzz" value="10" size="3"/>
 </div>
 <div>
-	<label for="output">Output</label>
-    <input type="file" id="output"/>
+	<label for="output">Where to write new PINs</label>
+	<input type="file" id="output"/>
 </div>
 <br/>
-<label for="verbose">Verbose</label>
-<input type="checkbox" id="verbose" value="1"/>
-
-<br/><br/>
+<div>
+	Verbose output
+	<input type="checkbox" id="verbose" value="1"/>
+</div>
+<br/>
 <input type="button" value="Run" name="run_button" onClick="RunProgram()">
 </form>
 </body>

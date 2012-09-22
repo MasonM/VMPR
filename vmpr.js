@@ -121,9 +121,8 @@ casper.changePinLoop = function changePin() {
                 this.die("Failed to write new PIN to file: " + pin, 1);
             }
             outFile.flush();
-        } else {
-            this.echo(pin);
         }
+        this.echo("Generated pin: " + pin);
         this.verboseEcho("Generated pin " + pin + ", now submitting PIN change form");
         // this is needed because the form to change the PIN is in an iframe,
         // which casper.fill() can't get to
@@ -137,7 +136,7 @@ casper.changePinLoop = function changePin() {
     this.then(function() {
         this.verboseEcho('Submitted form. url = ' + this.getCurrentUrl() + ', title = ' + this.getTitle());
         var sleepTime = randomBetween(frequency - fuzz, frequency + fuzz);
-        this.verboseEcho("Sleeping for " + sleepTime + " seconds");
+        this.echo("Successfully changed PIN. Sleeping for " + sleepTime + " seconds.");
         this.wait(sleepTime * 1000);
     });
     this.thenOpen(pinChangeUrl);
@@ -145,11 +144,12 @@ casper.changePinLoop = function changePin() {
 }
 
 casper
+    .echo("Accessing login page...")
     .start(pinChangeUrl)
     .userAgent('Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1')
     .wait(randomBetween(500, 1500)) //anti-bot-detection
     .then(function login() {
-        this.verboseEcho("Submitting login form");
+        this.echo("Logging in...");
         this.fill('.login_form', {
             "min": phoneNum,
             "vkey": pin
