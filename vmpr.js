@@ -122,8 +122,7 @@ casper.changePinLoop = function changePin() {
             }
             outFile.flush();
         }
-        this.echo("Generated pin: " + pin);
-        this.verboseEcho("Generated pin " + pin + ", now submitting PIN change form");
+        this.echo("Generated pin: " + pin + ", not submitting PIN change form");
         // this is needed because the form to change the PIN is in an iframe,
         // which casper.fill() can't get to
         this.evaluate(function(newPin) {
